@@ -8,7 +8,7 @@ let session = require('express-session');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
-require('./passport_setup')(passport);
+require('./passport_setup').default(passport);
 var app = express();
 
 // view engine setup
