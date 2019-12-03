@@ -1,10 +1,10 @@
 let models = require("../models");
-let bcryptjs = require("bcryptjs");
+let bcrypt = require("bcryptjs");
 const passport = require('passport');
 const myPassport = require('../passport_setup')(passport);
 let flash = require('connect-flash');
-const {isEmpity} = require('lodash');
-const validateUser = require("../validators/signup");
+const {isEmpty} = require('lodash');
+const {validateUser} = require("../validators/signup");
 
 exports.show_login = function(req, res, next) {
     res.render('user/login', { formData: {}, errors: {} });
@@ -19,12 +19,12 @@ const rerender_signup = function(errors, req, res, next) {
 }
 
 const generateHash = function(password) {
-    res.render('user/signup', { formData: {}, errors: {} });
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null)
 }
 exports.signup = function(req, res, next){
     let errors = {};
     return validateUser(errors, req).then(errors => {
-        if (!isEmpity(errors)) {
+        if (!isEmpty(errors)) {
             rerender_signup(errors, req, res, next);
         } else {
             return models.User.findOne({
@@ -34,12 +34,12 @@ exports.signup = function(req, res, next){
             }).then(user => {
                 let newUser;
                 if (user !== null) {
-                    const newUser = models.User.buils=d({
+                    newUser = models.User.build({
                         email: req.body.email,
                         password: generateHash(req.body.password)
-                    })
+                    });
                 } else {
-                    const newUser = models.User.buils=d({
+                    newUser = models.User.build({
                         email: req.body.email,
                         password: generateHash(req.body.password),
                         is_admin: true
@@ -52,7 +52,9 @@ exports.signup = function(req, res, next){
                             failureFlash: true
                         })(req, res, next);
                 })
-        })
+            })
+        }
+    })
 }
 
 exports.login = function(req, res, next){
@@ -63,8 +65,8 @@ exports.login = function(req, res, next){
     })(req, res, next);
 }
 
-exports.login = function(req, res, next){
+exports.logout = function(req, res, next){
     req.logout();
     req.session.destroy();
-    res,redirct('/');
+    res.redirect('/');
 }

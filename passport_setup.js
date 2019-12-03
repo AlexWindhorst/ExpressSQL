@@ -4,7 +4,7 @@ let bcrypt = require('bcryptjs')
 let models = require('./models');
 
 const validPassword = function(user, password) {
-    return bcryptjs.compareSync(password, user.password);
+    return bcrypt.compareSync(password, user.password);
 }
 module.exports = function(passport) {
     passport.serializeUser(function(user, done){
@@ -16,8 +16,10 @@ module.exports = function(passport) {
                 'id' : id
             }
         }).then(user => {
-            if (user == null)
+            if (user == null) {
                 done(new Error('Wrong user id.')) 
+        }
+        done(null, user);
         })
     });
     passport.use(new LocalStrategy({
